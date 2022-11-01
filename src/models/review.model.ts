@@ -1,4 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
+import {Movie} from './movie.model';
+import {User} from './user.model';
 
 @model({settings: {strict: false}})
 export class Review extends Entity {
@@ -8,21 +10,6 @@ export class Review extends Entity {
     mongodb: {dataType: 'ObjectId'},
   })
   id?: string;
-
-  @property({
-    type: 'string',
-    mongodb: {dataType: 'ObjectId'},
-    required: true,
-  })
-  movieId: string;
-
-  @property({
-    type: 'string',
-    mongodb: {dataType: 'ObjectId'},
-    required: true,
-  })
-  userId: string;
-
   @property({
     type: 'string',
     required: true,
@@ -47,6 +34,11 @@ export class Review extends Entity {
   })
   createdAt: string;
 
+  @belongsTo(() => Movie, {name: 'movie'})
+  movieId: string;
+
+  @belongsTo(() => User, {name: 'user'})
+  userId: string;
   // Define well-known properties here
 
   // Indexer property to allow additional data

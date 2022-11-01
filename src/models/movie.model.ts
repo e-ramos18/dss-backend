@@ -1,4 +1,7 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
+import {Actor} from './actor.model';
+import {Contract} from './contract.model';
+import {Review} from './review.model';
 
 @model({settings: {strict: false}})
 export class Movie extends Entity {
@@ -38,25 +41,17 @@ export class Movie extends Entity {
     required: true,
   })
   year: string;
-
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  actors: string[];
-
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  reviews: string[];
-
   @property({
     type: 'string',
     defaultFn: 'now',
   })
   createdAt?: string;
 
+  @hasMany(() => Review, {keyTo: 'movieId'})
+  reviews: Review[];
+
+  @hasMany(() => Actor, {through: {model: () => Contract}})
+  actors: Actor[];
   // Define well-known properties here
 
   // Indexer property to allow additional data

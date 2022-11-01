@@ -1,19 +1,18 @@
 import {
   Count,
   CountSchema,
-  Filter,
   FilterExcludingWhere,
   repository,
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
@@ -23,7 +22,7 @@ import {ReviewRepository} from '../repositories';
 export class ReviewController {
   constructor(
     @repository(ReviewRepository)
-    public reviewRepository : ReviewRepository,
+    public reviewRepository: ReviewRepository,
   ) {}
 
   @post('/reviews')
@@ -52,9 +51,7 @@ export class ReviewController {
     description: 'Review model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Review) where?: Where<Review>,
-  ): Promise<Count> {
+  async count(@param.where(Review) where?: Where<Review>): Promise<Count> {
     return this.reviewRepository.count(where);
   }
 
@@ -70,10 +67,13 @@ export class ReviewController {
       },
     },
   })
-  async find(
-    @param.filter(Review) filter?: Filter<Review>,
-  ): Promise<Review[]> {
-    return this.reviewRepository.find(filter);
+  async find(): Promise<Review[]> {
+    return this.reviewRepository.find({
+      include: [
+        {relation: 'movie', scope: {fields: ['title']}},
+        {relation: 'user', scope: {fields: ['name']}},
+      ],
+    });
   }
 
   @patch('/reviews')
@@ -106,7 +106,8 @@ export class ReviewController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Review, {exclude: 'where'}) filter?: FilterExcludingWhere<Review>
+    @param.filter(Review, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Review>,
   ): Promise<Review> {
     return this.reviewRepository.findById(id, filter);
   }
