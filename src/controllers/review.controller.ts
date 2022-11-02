@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -16,6 +17,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import {Roles} from '../authorization/role-keys';
 import {Review} from '../models';
 import {ReviewRepository} from '../repositories';
 
@@ -25,6 +27,10 @@ export class ReviewController {
     public reviewRepository: ReviewRepository,
   ) {}
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @post('/reviews')
   @response(200, {
     description: 'Review model instance',
@@ -46,6 +52,10 @@ export class ReviewController {
     return this.reviewRepository.create(review);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/reviews/count')
   @response(200, {
     description: 'Review model count',
@@ -55,6 +65,10 @@ export class ReviewController {
     return this.reviewRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/reviews')
   @response(200, {
     description: 'Array of Review model instances',
@@ -76,25 +90,10 @@ export class ReviewController {
     });
   }
 
-  @patch('/reviews')
-  @response(200, {
-    description: 'Review PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
   })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Review, {partial: true}),
-        },
-      },
-    })
-    review: Review,
-    @param.where(Review) where?: Where<Review>,
-  ): Promise<Count> {
-    return this.reviewRepository.updateAll(review, where);
-  }
-
   @get('/reviews/{id}')
   @response(200, {
     description: 'Review model instance',
@@ -112,6 +111,10 @@ export class ReviewController {
     return this.reviewRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @patch('/reviews/{id}')
   @response(204, {
     description: 'Review PATCH success',
@@ -130,6 +133,10 @@ export class ReviewController {
     await this.reviewRepository.updateById(id, review);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @put('/reviews/{id}')
   @response(204, {
     description: 'Review PUT success',
@@ -141,6 +148,10 @@ export class ReviewController {
     await this.reviewRepository.replaceById(id, review);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @del('/reviews/{id}')
   @response(204, {
     description: 'Review DELETE success',

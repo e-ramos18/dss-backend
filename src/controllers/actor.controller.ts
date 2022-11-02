@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -7,25 +8,30 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
+import {Roles} from '../authorization/role-keys';
 import {Actor} from '../models';
 import {ActorRepository} from '../repositories';
 
 export class ActorController {
   constructor(
     @repository(ActorRepository)
-    public actorRepository : ActorRepository,
+    public actorRepository: ActorRepository,
   ) {}
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @post('/actors')
   @response(200, {
     description: 'Actor model instance',
@@ -47,17 +53,23 @@ export class ActorController {
     return this.actorRepository.create(actor);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/actors/count')
   @response(200, {
     description: 'Actor model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Actor) where?: Where<Actor>,
-  ): Promise<Count> {
+  async count(@param.where(Actor) where?: Where<Actor>): Promise<Count> {
     return this.actorRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/actors')
   @response(200, {
     description: 'Array of Actor model instances',
@@ -70,31 +82,14 @@ export class ActorController {
       },
     },
   })
-  async find(
-    @param.filter(Actor) filter?: Filter<Actor>,
-  ): Promise<Actor[]> {
+  async find(@param.filter(Actor) filter?: Filter<Actor>): Promise<Actor[]> {
     return this.actorRepository.find(filter);
   }
 
-  @patch('/actors')
-  @response(200, {
-    description: 'Actor PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
   })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Actor, {partial: true}),
-        },
-      },
-    })
-    actor: Actor,
-    @param.where(Actor) where?: Where<Actor>,
-  ): Promise<Count> {
-    return this.actorRepository.updateAll(actor, where);
-  }
-
   @get('/actors/{id}')
   @response(200, {
     description: 'Actor model instance',
@@ -106,11 +101,16 @@ export class ActorController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Actor, {exclude: 'where'}) filter?: FilterExcludingWhere<Actor>
+    @param.filter(Actor, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Actor>,
   ): Promise<Actor> {
     return this.actorRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @patch('/actors/{id}')
   @response(204, {
     description: 'Actor PATCH success',
@@ -129,6 +129,10 @@ export class ActorController {
     await this.actorRepository.updateById(id, actor);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @put('/actors/{id}')
   @response(204, {
     description: 'Actor PUT success',
@@ -140,6 +144,10 @@ export class ActorController {
     await this.actorRepository.replaceById(id, actor);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @del('/actors/{id}')
   @response(204, {
     description: 'Actor DELETE success',

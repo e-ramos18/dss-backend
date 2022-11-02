@@ -35,7 +35,7 @@
     "start": "node -r source-map-support/register .",
     "clean": "lb-clean dist *.tsbuildinfo .eslintcache",
     "rebuild": "npm run clean && npm run build",
-    "dev" : "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -50,12 +50,17 @@
     "!*/__tests__"
   ],
   "dependencies": {
+    "@loopback/authentication": "^9.0.4",
+    "@loopback/authentication-jwt": "^0.12.4",
     "@loopback/boot": "^5.0.3",
     "@loopback/core": "^4.0.3",
     "@loopback/repository": "^5.0.4",
     "@loopback/rest": "^12.0.3",
     "@loopback/rest-explorer": "^5.0.3",
     "@loopback/service-proxy": "^5.0.3",
+    "bcryptjs": "^2.4.3",
+    "isemail": "^3.2.0",
+    "jsonwebtoken": "^8.5.1",
     "loopback-connector-mongodb": "^5.6.0",
     "tslib": "^2.0.0"
   },
@@ -63,6 +68,8 @@
     "@loopback/build": "^9.0.3",
     "@loopback/eslint-config": "^13.0.3",
     "@loopback/testlab": "^5.0.3",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^14.18.26",
     "eslint": "^8.22.0",
     "source-map-support": "^0.5.21",
@@ -70,8 +77,12 @@
   },
   "nodemonConfig": {
     "verbose": true,
-    "watch": [ "src/" ],
-    "ignore": [ "dist/*" ],
+    "watch": [
+      "src/"
+    ],
+    "ignore": [
+      "dist/*"
+    ],
     "ext": "ts",
     "exec": "npm start"
   }

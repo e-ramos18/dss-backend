@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -5,7 +6,7 @@ import {
   repository,
   Where,
 } from '@loopback/repository';
-  import {
+import {
   del,
   get,
   getModelSchemaRef,
@@ -15,18 +16,19 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
-import {
-Movie,
-Contract,
-Actor,
-} from '../models';
+import {Roles} from '../authorization/role-keys';
+import {Actor, Movie} from '../models';
 import {MovieRepository} from '../repositories';
 
 export class MovieActorController {
   constructor(
     @repository(MovieRepository) protected movieRepository: MovieRepository,
-  ) { }
+  ) {}
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/movies/{id}/actors', {
     responses: {
       '200': {
@@ -46,6 +48,10 @@ export class MovieActorController {
     return this.movieRepository.actors(id).find(filter);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @post('/movies/{id}/actors', {
     responses: {
       '200': {
@@ -65,11 +71,16 @@ export class MovieActorController {
           }),
         },
       },
-    }) actor: Omit<Actor, 'id'>,
+    })
+    actor: Omit<Actor, 'id'>,
   ): Promise<Actor> {
     return this.movieRepository.actors(id).create(actor);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @patch('/movies/{id}/actors', {
     responses: {
       '200': {
@@ -93,6 +104,10 @@ export class MovieActorController {
     return this.movieRepository.actors(id).patch(actor, where);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin]},
+  })
   @del('/movies/{id}/actors', {
     responses: {
       '200': {

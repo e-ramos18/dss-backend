@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -15,17 +16,19 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
-import {
-  Movie,
-  Review,
-} from '../models';
+import {Roles} from '../authorization/role-keys';
+import {Movie, Review} from '../models';
 import {MovieRepository} from '../repositories';
 
 export class MovieReviewController {
   constructor(
     @repository(MovieRepository) protected movieRepository: MovieRepository,
-  ) { }
+  ) {}
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/movies/{id}/reviews', {
     responses: {
       '200': {
@@ -45,6 +48,10 @@ export class MovieReviewController {
     return this.movieRepository.reviews(id).find(filter);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @post('/movies/{id}/reviews', {
     responses: {
       '200': {
@@ -61,15 +68,20 @@ export class MovieReviewController {
           schema: getModelSchemaRef(Review, {
             title: 'NewReviewInMovie',
             exclude: ['id'],
-            optional: ['movieId']
+            optional: ['movieId'],
           }),
         },
       },
-    }) review: Omit<Review, 'id'>,
+    })
+    review: Omit<Review, 'id'>,
   ): Promise<Review> {
     return this.movieRepository.reviews(id).create(review);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @patch('/movies/{id}/reviews', {
     responses: {
       '200': {
@@ -88,11 +100,16 @@ export class MovieReviewController {
       },
     })
     review: Partial<Review>,
-    @param.query.object('where', getWhereSchemaFor(Review)) where?: Where<Review>,
+    @param.query.object('where', getWhereSchemaFor(Review))
+    where?: Where<Review>,
   ): Promise<Count> {
     return this.movieRepository.reviews(id).patch(review, where);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @del('/movies/{id}/reviews', {
     responses: {
       '200': {
@@ -103,7 +120,8 @@ export class MovieReviewController {
   })
   async delete(
     @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Review)) where?: Where<Review>,
+    @param.query.object('where', getWhereSchemaFor(Review))
+    where?: Where<Review>,
   ): Promise<Count> {
     return this.movieRepository.reviews(id).delete(where);
   }

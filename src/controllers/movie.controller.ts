@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -16,6 +17,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import {Roles} from '../authorization/role-keys';
 import {Movie} from '../models';
 import {MovieRepository} from '../repositories';
 
@@ -25,6 +27,10 @@ export class MovieController {
     public movieRepository: MovieRepository,
   ) {}
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @post('/movies')
   @response(200, {
     description: 'Movie model instance',
@@ -46,6 +52,10 @@ export class MovieController {
     return this.movieRepository.create(movie);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/movies/count')
   @response(200, {
     description: 'Movie model count',
@@ -55,6 +65,10 @@ export class MovieController {
     return this.movieRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @get('/movies')
   @response(200, {
     description: 'Array of Movie model instances',
@@ -71,25 +85,10 @@ export class MovieController {
     return this.movieRepository.find({include: ['reviews', 'actors']});
   }
 
-  @patch('/movies')
-  @response(200, {
-    description: 'Movie PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
   })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Movie, {partial: true}),
-        },
-      },
-    })
-    movie: Movie,
-    @param.where(Movie) where?: Where<Movie>,
-  ): Promise<Count> {
-    return this.movieRepository.updateAll(movie, where);
-  }
-
   @get('/movies/{id}')
   @response(200, {
     description: 'Movie model instance',
@@ -107,6 +106,10 @@ export class MovieController {
     return this.movieRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @patch('/movies/{id}')
   @response(204, {
     description: 'Movie PATCH success',
@@ -125,6 +128,10 @@ export class MovieController {
     await this.movieRepository.updateById(id, movie);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @put('/movies/{id}')
   @response(204, {
     description: 'Movie PUT success',
@@ -136,6 +143,10 @@ export class MovieController {
     await this.movieRepository.replaceById(id, movie);
   }
 
+  @authenticate({
+    strategy: 'jwt',
+    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+  })
   @del('/movies/{id}')
   @response(204, {
     description: 'Movie DELETE success',
