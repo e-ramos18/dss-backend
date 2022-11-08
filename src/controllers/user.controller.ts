@@ -12,6 +12,7 @@ import {
   del,
   get,
   getModelSchemaRef,
+  HttpErrors,
   param,
   patch,
   post,
@@ -60,8 +61,15 @@ export class UserController {
   async signup(@requestBody() userData: User) {
     validateCredentials(_.pick(userData, ['email', 'password']));
     userData.password = await this.hasher.hashPassword(userData.password);
-    const savedUser = await this.userRepository.create(userData);
-    return _.omit(savedUser, ['password']);
+    try {
+      const savedUser = await this.userRepository.create(userData);
+      return _.omit(savedUser, ['password']);
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new HttpErrors.Conflict('Email is already taken.');
+      }
+      throw error;
+    }
   }
 
   @post('/users/login')
@@ -116,20 +124,11 @@ export class UserController {
     description: 'User model instance',
     content: {'application/json': {schema: getModelSchemaRef(User)}},
   })
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, {
-            title: 'NewUser',
-            exclude: ['id'],
-          }),
-        },
-      },
-    })
-    user: Omit<User, 'id'>,
-  ): Promise<User> {
-    return this.userRepository.create(user);
+  async create(@requestBody() user: User) {
+    validateCredentials(_.pick(user, ['email', 'password']));
+    user.password = await this.hasher.hashPassword(user.password);
+    const savedUser = await this.userRepository.create(user);
+    return _.omit(savedUser, ['password']);
   }
 
   @authenticate({
@@ -145,10 +144,6 @@ export class UserController {
     return this.userRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/users')
   @response(200, {
     description: 'Array of User model instances',
@@ -162,7 +157,9 @@ export class UserController {
     },
   })
   async find(@param.filter(User) filter?: Filter<User>): Promise<User[]> {
-    return this.userRepository.find(filter);
+    return this.userRepository.find(filter, {
+      fields: ['id', 'email', 'name', 'role', 'isApproved', 'createdAt'],
+    });
   }
 
   @authenticate({
@@ -203,8 +200,10 @@ export class UserController {
       },
     })
     user: User,
-  ): Promise<void> {
+  ) {
     await this.userRepository.updateById(id, user);
+    const savedUser = await this.userRepository.findById(id);
+    return _.omit(savedUser, ['password']);
   }
 
   @authenticate({
@@ -230,7 +229,8 @@ export class UserController {
   @response(204, {
     description: 'User DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<string> {
     await this.userRepository.deleteById(id);
+    return id;
   }
 }

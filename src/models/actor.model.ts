@@ -31,6 +31,18 @@ export class Actor extends Entity {
     type: 'string',
     required: true,
   })
+  age: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  about: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
   imageUrl: string;
 
   @property({

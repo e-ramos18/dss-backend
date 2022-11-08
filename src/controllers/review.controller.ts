@@ -1,11 +1,5 @@
 import {authenticate} from '@loopback/authentication';
-import {
-  Count,
-  CountSchema,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
+import {Count, CountSchema, repository, Where} from '@loopback/repository';
 import {
   del,
   get,
@@ -29,7 +23,7 @@ export class ReviewController {
 
   @authenticate({
     strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
+    options: {required: [Roles.User]},
   })
   @post('/reviews')
   @response(200, {
@@ -65,10 +59,6 @@ export class ReviewController {
     return this.reviewRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/reviews')
   @response(200, {
     description: 'Array of Review model instances',
@@ -90,10 +80,6 @@ export class ReviewController {
     });
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/reviews/{id}')
   @response(200, {
     description: 'Review model instance',
@@ -103,12 +89,13 @@ export class ReviewController {
       },
     },
   })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(Review, {exclude: 'where'})
-    filter?: FilterExcludingWhere<Review>,
-  ): Promise<Review> {
-    return this.reviewRepository.findById(id, filter);
+  async findById(@param.path.string('id') id: string): Promise<Review> {
+    return this.reviewRepository.findById(id, {
+      include: [
+        {relation: 'movie', scope: {fields: ['title']}},
+        {relation: 'user', scope: {fields: ['name']}},
+      ],
+    });
   }
 
   @authenticate({
@@ -129,8 +116,14 @@ export class ReviewController {
       },
     })
     review: Review,
-  ): Promise<void> {
+  ): Promise<Review> {
     await this.reviewRepository.updateById(id, review);
+    return this.reviewRepository.findById(id, {
+      include: [
+        {relation: 'movie', scope: {fields: ['title']}},
+        {relation: 'user', scope: {fields: ['name']}},
+      ],
+    });
   }
 
   @authenticate({

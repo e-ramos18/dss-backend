@@ -6,7 +6,7 @@ import {PasswordHasher} from './services/hash.password';
 
 export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = '138asda8213';
-  export const TOKEN_EXPIRES_IN_VALUE = '7h';
+  export const TOKEN_EXPIRES_IN_VALUE = '7D';
 }
 export namespace TokenServiceBindings {
   export const TOKEN_SECRET = BindingKey.create<string>(
@@ -21,9 +21,8 @@ export namespace TokenServiceBindings {
 }
 
 export namespace PasswordHasherBindings {
-  export const PASSWORD_HASHER = BindingKey.create<PasswordHasher>(
-    'services.hasher',
-  );
+  export const PASSWORD_HASHER =
+    BindingKey.create<PasswordHasher>('services.hasher');
   export const ROUNDS = BindingKey.create<number>('services.hasher.rounds');
 }
 

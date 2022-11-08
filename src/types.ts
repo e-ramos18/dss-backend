@@ -9,4 +9,5 @@ export interface MyUserProfile {
   email: string;
   name: string;
   role: Roles;
+  isApproved: boolean;
 }

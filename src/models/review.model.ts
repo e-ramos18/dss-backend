@@ -24,9 +24,9 @@ export class Review extends Entity {
 
   @property({
     type: 'boolean',
-    required: true,
+    default: false,
   })
-  isApproved: boolean;
+  isApproved?: boolean;
 
   @property({
     type: 'string',

@@ -69,7 +69,9 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
       // Add post-invocation logic here
       return result;
     } catch (err) {
-      console.log({err});
+      if (err.code === 11000) {
+        throw new HttpErrors.Conflict('Email is already taken.');
+      }
       // Add error handling logic here
       throw new HttpErrors.InternalServerError('Something went wrong.');
     }

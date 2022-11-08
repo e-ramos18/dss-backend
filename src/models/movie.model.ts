@@ -37,6 +37,13 @@ export class Movie extends Entity {
   imageUrl: string;
 
   @property({
+    type: 'array',
+    itemType: 'string',
+    required: true,
+  })
+  actorsIds: string[];
+
+  @property({
     type: 'string',
     required: true,
   })

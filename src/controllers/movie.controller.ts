@@ -1,11 +1,5 @@
 import {authenticate} from '@loopback/authentication';
-import {
-  Count,
-  CountSchema,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
+import {Count, CountSchema, repository, Where} from '@loopback/repository';
 import {
   del,
   get,
@@ -65,10 +59,6 @@ export class MovieController {
     return this.movieRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/movies')
   @response(200, {
     description: 'Array of Movie model instances',
@@ -82,13 +72,11 @@ export class MovieController {
     },
   })
   async find(): Promise<Movie[]> {
-    return this.movieRepository.find({include: ['reviews', 'actors']});
+    return this.movieRepository.find({
+      include: ['reviews'],
+    });
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/movies/{id}')
   @response(200, {
     description: 'Movie model instance',
@@ -98,12 +86,10 @@ export class MovieController {
       },
     },
   })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(Movie, {exclude: 'where'})
-    filter?: FilterExcludingWhere<Movie>,
-  ): Promise<Movie> {
-    return this.movieRepository.findById(id, filter);
+  async findById(@param.path.string('id') id: string): Promise<Movie> {
+    return this.movieRepository.findById(id, {
+      include: ['reviews'],
+    });
   }
 
   @authenticate({
@@ -139,8 +125,9 @@ export class MovieController {
   async replaceById(
     @param.path.string('id') id: string,
     @requestBody() movie: Movie,
-  ): Promise<void> {
+  ): Promise<Movie> {
     await this.movieRepository.replaceById(id, movie);
+    return this.movieRepository.findById(id);
   }
 
   @authenticate({
@@ -151,7 +138,8 @@ export class MovieController {
   @response(204, {
     description: 'Movie DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<string> {
     await this.movieRepository.deleteById(id);
+    return id;
   }
 }

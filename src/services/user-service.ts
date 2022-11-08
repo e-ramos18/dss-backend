@@ -27,12 +27,16 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!foundUser) {
       throw new HttpErrors.NotFound('User not found.');
     }
+
+    if (!foundUser.isApproved) {
+      throw new HttpErrors.Unauthorized('Account needs approval.');
+    }
     const passwordMatched = await this.hasher.comparePassword(
       credentials.password,
       foundUser.password,
     );
     if (!passwordMatched)
-      throw new HttpErrors.Unauthorized('Password is not valid.');
+      throw new HttpErrors.Unauthorized('Invalid credentials.');
     return foundUser;
   }
   convertToUserProfile(user: User): UserProfile {
@@ -42,6 +46,7 @@ export class MyUserService implements UserService<User, Credentials> {
       email: user.email,
       name: user.name,
       role: user.role,
+      isApproved: user.isApproved,
     };
   }
 }

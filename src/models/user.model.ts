@@ -12,6 +12,9 @@ export class User extends Entity {
   @property({
     type: 'string',
     required: true,
+    index: {
+      unique: true,
+    },
   })
   email: string;
 
@@ -32,6 +35,12 @@ export class User extends Entity {
     required: true,
   })
   role: string;
+
+  @property({
+    type: Boolean,
+    default: false,
+  })
+  isApproved?: boolean;
 
   @property({
     type: 'string',

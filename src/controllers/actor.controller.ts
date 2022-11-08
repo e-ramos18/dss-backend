@@ -66,10 +66,6 @@ export class ActorController {
     return this.actorRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/actors')
   @response(200, {
     description: 'Array of Actor model instances',
@@ -86,10 +82,6 @@ export class ActorController {
     return this.actorRepository.find(filter);
   }
 
-  @authenticate({
-    strategy: 'jwt',
-    options: {required: [Roles.RootAdmin, Roles.Admin, Roles.User]},
-  })
   @get('/actors/{id}')
   @response(200, {
     description: 'Actor model instance',
@@ -140,8 +132,9 @@ export class ActorController {
   async replaceById(
     @param.path.string('id') id: string,
     @requestBody() actor: Actor,
-  ): Promise<void> {
+  ): Promise<Actor> {
     await this.actorRepository.replaceById(id, actor);
+    return this.actorRepository.findById(id);
   }
 
   @authenticate({
@@ -152,7 +145,8 @@ export class ActorController {
   @response(204, {
     description: 'Actor DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<string> {
     await this.actorRepository.deleteById(id);
+    return id;
   }
 }
